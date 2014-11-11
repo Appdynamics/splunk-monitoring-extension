@@ -3,6 +3,11 @@ package com.appdynamics.extensions.splunk;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.log4j.Logger;
 
@@ -24,8 +29,9 @@ public class SplunkMonitor extends AManagedMonitor {
 	private static Logger logger = Logger.getLogger("com.singularity.extensions.SplunkMonitor");
 	public static final String CONFIG_ARG = "config-file";
 	public static final String METRIC_SEPARATOR = "|";
+	private static final int DEFAULT_NUMBER_OF_THREADS = 5;
 
-	private SimpleHttpClient httpClient;
+	private ExecutorService threadPool;
 
 	public SplunkMonitor() {
 		String msg = "Using Monitor Version [" + getImplementationVersion() + "]";
@@ -38,20 +44,35 @@ public class SplunkMonitor extends AManagedMonitor {
 			logger.info("Starting the Splunk Monitoring Task");
 			String configFilename = getConfigFilename(taskArguments.get(CONFIG_ARG));
 			try {
-				Configuration config = YmlReader.readFromFile(configFilename, Configuration.class);
-				Map<String, String> clientArguments = buildHttpClientArguments(config);
+				final Configuration config = YmlReader.readFromFile(configFilename, Configuration.class);
+				final Map<String, String> clientArguments = buildHttpClientArguments(config);
 
-				httpClient = SimpleHttpClient.builder(clientArguments).build();
-				String authToken = new Authenticator().getAuthToken(config, httpClient);
+				SimpleHttpClient httpClient = SimpleHttpClient.builder(clientArguments).build();
+				final String authToken = new Authenticator().getAuthToken(config, httpClient);
+				threadPool = Executors.newFixedThreadPool(config.getNumberOfThreads() == 0 ? DEFAULT_NUMBER_OF_THREADS : config.getNumberOfThreads());
 
-				Map<String, String> metrics = SplunkMonitorTask.processSplunkMetrics(httpClient, authToken, config.getSearchKeywords());
-
-				printMetrics(config, metrics);
-
+				CompletionService ecs = new ExecutorCompletionService(threadPool);
+				int count = 0;
+				for (final String keyWord : config.getSearchKeywords()) {
+					ecs.submit(new Callable() {
+						public Object call() throws Exception {
+							fetchAndPrintMetrics(clientArguments, config, authToken, keyWord);
+							return null;
+						}
+					});
+					++count;
+				}
+				for (int i = 0; i < count; i++) {
+					ecs.take().get();
+				}
 				logger.info("Splunk monitoring task completed successfully.");
 				return new TaskOutput("Splunk monitoring task completed successfully.");
 			} catch (Exception e) {
 				logger.error("Metrics collection failed", e);
+			} finally {
+				if (!threadPool.isShutdown()) {
+					threadPool.shutdown();
+				}
 			}
 		}
 		throw new TaskExecutionException("Splunk monitoring task completed with failures.");
@@ -65,6 +86,13 @@ public class SplunkMonitor extends AManagedMonitor {
 		clientArgs.put(TaskInputArgs.USER, config.getUsername());
 		clientArgs.put(TaskInputArgs.PASSWORD, config.getPassword());
 		return clientArgs;
+	}
+
+	private void fetchAndPrintMetrics(Map<String, String> clientArguments, Configuration config, String authToken, String keyWord) {
+		SimpleHttpClient httpClient = SimpleHttpClient.builder(clientArguments).build();
+		SplunkMonitorTask monitorTask = new SplunkMonitorTask();
+		Map<String, String> metrics = monitorTask.processSplunkMetrics(httpClient, authToken, keyWord);
+		printMetrics(config, metrics);
 	}
 
 	private void printMetrics(Configuration config, Map<String, String> metrics) {

@@ -30,6 +30,7 @@ public class Authenticator {
 			}
 			authToken = jsonNode.findValue("sessionKey").asText();
 		} catch (Exception e) {
+			logger.error(e);
 			throw new RuntimeException(e);
 		} finally {
 			try {

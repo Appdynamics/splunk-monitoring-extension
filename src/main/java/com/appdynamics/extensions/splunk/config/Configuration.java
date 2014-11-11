@@ -11,6 +11,7 @@ public class Configuration {
 	private String password;
 	private boolean usessl;
 	private Set<String> searchKeywords = new HashSet<String>();
+	private int numberOfThreads;
 	private String metricPrefix;
 
 	public String getHost() {
@@ -67,5 +68,13 @@ public class Configuration {
 
 	public void setSearchKeywords(Set<String> searchKeywords) {
 		this.searchKeywords = searchKeywords;
+	}
+
+	public int getNumberOfThreads() {
+		return numberOfThreads;
+	}
+
+	public void setNumberOfThreads(int numberOfThreads) {
+		this.numberOfThreads = numberOfThreads;
 	}
 }
