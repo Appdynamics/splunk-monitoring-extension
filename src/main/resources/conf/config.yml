@@ -1,0 +1,12 @@
+# Splunk Server particulars
+
+host: "localhost"
+# Splunkd Management port
+port: 8089
+username: "admin"
+password: "admin"
+usessl: true
+
+searchKeywords: ["controller","thread"]  
+#prefix used to show up metrics in AppDynamics
+metricPrefix:  "Custom Metrics|Splunk|"
