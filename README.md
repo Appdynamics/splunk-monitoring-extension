@@ -4,11 +4,16 @@ This extension works only with the standalone machine agent.
 
 ## Use Case
 Splunk captures, indexes and correlates real-time data in a searchable repository from which it can generate graphs, reports, alerts, dashboards and visualizations.
-Splunk Monitoring extension reports event count to AppDynamics Controller for a keyword per minute basis.
+
+Using Splunk's REST API, this extension searches for a keyword every minute and reports event count to AppDynamics Controller. Equivalent curl of the query used in the extension is `curl -k -u <user>:<password> https://<host>:<port>/servicesNS/admin/search/search/jobs/export -d search="search <keyword> | stats count by sourcetype" -d "earliest_time=-1@m" -d "output_mode=json"`
 
 ##Installation
 1. Run 'mvn clean install' from the splunk-monitoring-extension directory and find the SplunkMonitor.zip in the "target" folder.
 2. Unzip as "SplunkMonitor" and copy the "SplunkMonitor" directory to `<MACHINE_AGENT_HOME>/monitors`
+3. Configure the extension referring to the below section.
+4. Restart the machine agent.
+
+In the AppDynamics Metric Browser, look for `Application Infrastructure Performance | <METRIC_PREFIX>|keyword|source-type|count`
 
 ## Configuration ##
 Note : Please make sure to not use tab (\t) while editing yaml files. You may want to validate the yaml file using a [yaml validator](http://yamllint.com/)
@@ -50,18 +55,13 @@ Note : Please make sure to not use tab (\t) while editing yaml files. You may wa
 
 ## Metrics
 
-* Count (event count for a keyword)
-
-In addition to the above metrics, we also add a metric called "Metrics Collection Successful" with a value 0 when an error occurs and 1 when the metrics collection is successful.
+* count (event count for a keyword)
 
 Note : By default, a Machine agent or a AppServer agent can send a fixed number of metrics to the controller. To change this limit, please follow the instructions mentioned [here](http://docs.appdynamics.com/display/PRO14S/Metrics+Limits).
 For eg.  
 ```    
     java -Dappdynamics.agent.maxMetrics=2500 -jar machineagent.jar
 ```
-
-## Custom Dashboard
-![]()
 
 ## Contributing
 Always feel free to fork and contribute any changes directly here on GitHub.
