@@ -1,6 +1,7 @@
 package com.appdynamics.extensions.splunk;
 
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import org.apache.log4j.Logger;
 
@@ -11,14 +12,40 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 
-public class SplunkMonitorTask {
+/**
+ * Copyright 2014 AppDynamics, Inc.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+public class SplunkMonitorTask implements Callable<SplunkMetrics> {
 
 	private static final Logger logger = Logger.getLogger(SplunkMonitorTask.class);
 	private static final String QUERY_ENDPOINT_URI = "/servicesNS/admin/search/search/jobs/export";
 	private static final String QUERY = "search=search %s | stats count by sourcetype&earliest_time=-1@m&output_mode=json";
 	public static final String METRIC_SEPARATOR = "|";
 
-	public Map<String, String> processSplunkMetrics(SimpleHttpClient httpClient, String authToken, String keyword) {
+	private SimpleHttpClient httpClient;
+	private String authToken;
+	private String keyword;
+
+	public SplunkMonitorTask(SimpleHttpClient httpClient, String authToken, String keyword) {
+		this.httpClient = httpClient;
+		this.authToken = authToken;
+		this.keyword = keyword;
+	}
+
+	public SplunkMetrics call() throws Exception {
+		SplunkMetrics splunkMetrics = new SplunkMetrics();
 		Map<String, String> metrics = Maps.newHashMap();
 		Response response = null;
 		try {
@@ -38,6 +65,7 @@ public class SplunkMonitorTask {
 					String value = node.findValue("count").asText();
 					String metricPath = keyword + METRIC_SEPARATOR + sourceType + METRIC_SEPARATOR + "count";
 					metrics.put(metricPath, value);
+					splunkMetrics.setMetrics(metrics);
 				}
 			}
 		} catch (Exception e) {
@@ -51,7 +79,6 @@ public class SplunkMonitorTask {
 				// Ignore
 			}
 		}
-		return metrics;
+		return splunkMetrics;
 	}
-
 }
