@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Authenticator {
 
-	private static final Logger logger = Logger.getLogger("com.singularity.extensions.Authenticator");
+	private static final Logger logger = Logger.getLogger(Authenticator.class);
 	private static final String httpPostParam = "username=%s&password=%s&output_mode=json";
 	private static final String AUTH_URI = "/servicesNS/admin/search/auth/login/";
 	private String authToken;

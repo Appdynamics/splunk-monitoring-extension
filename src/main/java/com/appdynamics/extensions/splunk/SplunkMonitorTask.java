@@ -13,7 +13,7 @@ import com.google.common.collect.Maps;
 
 public class SplunkMonitorTask {
 
-	private static final Logger logger = Logger.getLogger("com.singularity.extensions.SplunkMonitorTask");
+	private static final Logger logger = Logger.getLogger(SplunkMonitorTask.class);
 	private static final String QUERY_ENDPOINT_URI = "/servicesNS/admin/search/search/jobs/export";
 	private static final String QUERY = "search=search %s | stats count by sourcetype&earliest_time=-1@m&output_mode=json";
 	public static final String METRIC_SEPARATOR = "|";
@@ -26,7 +26,7 @@ public class SplunkMonitorTask {
 			target.header("Authorization", authToken);
 			String data = String.format(QUERY, keyword);
 			response = target.post(data);
-			String[] lines = response.string().split(System.lineSeparator());
+			String[] lines = response.string().split(System.getProperty("line.separator"));
 			for (String line : lines) {
 				JsonNode node = new ObjectMapper().readValue(line, JsonNode.class);
 				if (lines.length == 1 && node.findValue("sourcetype") == null) {

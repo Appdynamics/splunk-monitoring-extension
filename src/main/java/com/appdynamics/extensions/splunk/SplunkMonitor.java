@@ -26,7 +26,7 @@ import com.singularity.ee.agent.systemagent.api.exception.TaskExecutionException
 
 public class SplunkMonitor extends AManagedMonitor {
 
-	private static Logger logger = Logger.getLogger("com.singularity.extensions.SplunkMonitor");
+	private static Logger logger = Logger.getLogger(SplunkMonitor.class);
 	public static final String CONFIG_ARG = "config-file";
 	public static final String METRIC_SEPARATOR = "|";
 	private static final int DEFAULT_NUMBER_OF_THREADS = 5;
