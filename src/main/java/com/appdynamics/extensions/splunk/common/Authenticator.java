@@ -29,10 +29,10 @@ public class Authenticator {
 	private static final Logger logger = Logger.getLogger(Authenticator.class);
 	private static final String httpPostParam = "username=%s&password=%s&output_mode=json";
 	private static final String AUTH_URI = "/servicesNS/admin/search/auth/login/";
-	private String authToken;
 
 	public String getAuthToken(Configuration config, SimpleHttpClient httpClient) {
 		Response response = null;
+		String authToken;
 		try {
 			response = postAuthenticationRequest(config, httpClient);
 			JsonNode jsonNode = parseAuthenticationResponse(response);

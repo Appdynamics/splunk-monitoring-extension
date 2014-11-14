@@ -31,7 +31,7 @@ public class SplunkMonitorTask implements Callable<SplunkMetrics> {
 
 	private static final Logger logger = Logger.getLogger(SplunkMonitorTask.class);
 	private static final String QUERY_ENDPOINT_URI = "/servicesNS/admin/search/search/jobs/export";
-	private static final String QUERY = "search=search %s | stats count by sourcetype&earliest_time=-1@m&output_mode=json";
+	private static final String QUERY = "search=search %s | stats count by sourcetype&earliest_time=-1m&output_mode=json";
 	public static final String METRIC_SEPARATOR = "|";
 
 	private SimpleHttpClient httpClient;
