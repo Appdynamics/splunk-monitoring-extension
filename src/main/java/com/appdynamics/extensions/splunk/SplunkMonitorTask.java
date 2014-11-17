@@ -1,5 +1,6 @@
 package com.appdynamics.extensions.splunk;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
@@ -31,7 +32,7 @@ public class SplunkMonitorTask implements Callable<SplunkMetrics> {
 
 	private static final Logger logger = Logger.getLogger(SplunkMonitorTask.class);
 	private static final String QUERY_ENDPOINT_URI = "/servicesNS/admin/search/search/jobs/export";
-	private static final String QUERY = "search=search %s | stats count by sourcetype&earliest_time=-1m&output_mode=json";
+	private static final String QUERY = "search=search %s | stats count by sourcetype&earliest_time=%d&latest_time=%d&output_mode=json";
 	public static final String METRIC_SEPARATOR = "|";
 
 	private SimpleHttpClient httpClient;
@@ -49,10 +50,20 @@ public class SplunkMonitorTask implements Callable<SplunkMetrics> {
 		Map<String, String> metrics = Maps.newHashMap();
 		Response response = null;
 		try {
+			// queries Splunk to get event count for the earlier minute
+			// to avoid indexing lag and accurate value
+			long currentTime = System.currentTimeMillis() / 1000;
+			long toTime = currentTime - currentTime % 60;
+			long fromTime = toTime - 60;
+
 			WebTarget target = httpClient.target().path(QUERY_ENDPOINT_URI);
 			target.header("Authorization", authToken);
-			String data = String.format(QUERY, keyword);
+			String data = String.format(QUERY, keyword, fromTime, toTime);
 			response = target.post(data);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Queried Splunk for " + keyword + " to retrieve eventcount for the time period " + new Date(fromTime * 1000) + " to "
+						+ new Date(toTime * 1000));
+			}
 			String[] lines = response.string().split(System.getProperty("line.separator"));
 			for (String line : lines) {
 				JsonNode node = new ObjectMapper().readValue(line, JsonNode.class);

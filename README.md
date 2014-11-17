@@ -5,7 +5,7 @@ This extension works only with the standalone machine agent.
 ## Use Case
 Splunk captures, indexes and correlates real-time data in a searchable repository from which it can generate graphs, reports, alerts, dashboards and visualizations.
 
-Using Splunk's REST API, this extension searches for a keyword every minute and reports event count to AppDynamics Controller. Equivalent curl of the query used in the extension is `curl -k -u <user>:<password> https://<host>:<port>/servicesNS/admin/search/search/jobs/export -d search="search <keyword> | stats count by sourcetype" -d "earliest_time=-1@m" -d "output_mode=json"`
+Using Splunk's REST API, this extension searches for a keyword every minute and reports event count to AppDynamics Controller. Equivalent curl of the query used in the extension is `curl -k -u <user>:<password> https://<host>:<port>/servicesNS/admin/search/search/jobs/export -d search="search <keyword> | stats count by sourcetype" -d "earliest_time=<from_time_in_epoch>" -d "latest_time=<to_time_in_epoch>" -d "output_mode=json"`
 
 ##Installation
 1. Run 'mvn clean install' from the splunk-monitoring-extension directory and find the SplunkMonitor.zip in the "target" folder.
