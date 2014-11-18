@@ -63,6 +63,9 @@ For eg.
     java -Dappdynamics.agent.maxMetrics=2500 -jar machineagent.jar
 ```
 
+## Custom Dashboard
+![](https://github.com/Appdynamics/splunk-monitoring-extension/raw/master/SplunkDashboard.png)
+
 ## Contributing
 Always feel free to fork and contribute any changes directly here on GitHub.
 
