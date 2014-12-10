@@ -9,8 +9,10 @@ import org.apache.log4j.Logger;
 import com.appdynamics.extensions.http.Response;
 import com.appdynamics.extensions.http.SimpleHttpClient;
 import com.appdynamics.extensions.http.WebTarget;
+import com.appdynamics.extensions.splunk.config.SearchKeyword;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 
 /**
@@ -30,16 +32,17 @@ import com.google.common.collect.Maps;
  */
 public class SplunkMonitorTask implements Callable<SplunkMetrics> {
 
+	private static final String AMPERSAND = "&";
+	private static final String SPACE = " ";
 	private static final Logger logger = Logger.getLogger(SplunkMonitorTask.class);
 	private static final String QUERY_ENDPOINT_URI = "/servicesNS/admin/search/search/jobs/export";
-	private static final String QUERY = "search=search %s | stats count by sourcetype&earliest_time=%d&latest_time=%d&output_mode=json";
 	public static final String METRIC_SEPARATOR = "|";
 
 	private SimpleHttpClient httpClient;
 	private String authToken;
-	private String keyword;
+	private SearchKeyword keyword;
 
-	public SplunkMonitorTask(SimpleHttpClient httpClient, String authToken, String keyword) {
+	public SplunkMonitorTask(SimpleHttpClient httpClient, String authToken, SearchKeyword keyword) {
 		this.httpClient = httpClient;
 		this.authToken = authToken;
 		this.keyword = keyword;
@@ -58,27 +61,18 @@ public class SplunkMonitorTask implements Callable<SplunkMetrics> {
 
 			WebTarget target = httpClient.target().path(QUERY_ENDPOINT_URI);
 			target.header("Authorization", authToken);
-			String data = String.format(QUERY, keyword, fromTime, toTime);
+			String data = buildQuery(keyword, fromTime, toTime);
 			response = target.post(data);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Queried Splunk for " + keyword + " to retrieve eventcount for the time period " + new Date(fromTime * 1000) + " to "
 						+ new Date(toTime * 1000));
 			}
-			String[] lines = response.string().split(System.getProperty("line.separator"));
-			for (String line : lines) {
-				JsonNode node = new ObjectMapper().readValue(line, JsonNode.class);
-				if (lines.length == 1 && node.findValue("sourcetype") == null) {
-					logger.info("No events found for search keyword " + keyword);
-					break;
-				}
-				if (node.findValue("sourcetype") != null) {
-					String sourceType = node.findValue("sourcetype").asText();
-					String value = node.findValue("count").asText();
-					String metricPath = keyword + METRIC_SEPARATOR + sourceType + METRIC_SEPARATOR + "count";
-					metrics.put(metricPath, value);
-					splunkMetrics.setMetrics(metrics);
-				}
-			}
+			JsonNode node = new ObjectMapper().readValue(response.string(), JsonNode.class);
+			String value = node.findValue("count").asText();
+			String metricName = Strings.isNullOrEmpty(keyword.getDisplayName()) ? keyword.getKeyword() : keyword.getDisplayName();
+			String metricPath = metricName + "_count";
+			metrics.put(metricPath, value);
+			splunkMetrics.setMetrics(metrics);
 		} catch (Exception e) {
 			logger.error("Error in querying count for " + keyword, e);
 		} finally {
@@ -91,5 +85,17 @@ public class SplunkMonitorTask implements Callable<SplunkMetrics> {
 			}
 		}
 		return splunkMetrics;
+	}
+
+	public String buildQuery(SearchKeyword keyword, long fromTime, long toTime) {
+		StringBuilder query = new StringBuilder("search=search ");
+		query.append(Strings.isNullOrEmpty(keyword.getKeyword()) ? "" : keyword.getKeyword() + SPACE);
+		query.append(Strings.isNullOrEmpty(keyword.getHost()) ? "" : "host=" + keyword.getHost() + SPACE);
+		query.append(Strings.isNullOrEmpty(keyword.getSource()) ? "" : "source=" + keyword.getSource() + SPACE);
+		query.append(Strings.isNullOrEmpty(keyword.getSourcetype()) ? "" : "sourcetype=" + keyword.getSourcetype() + SPACE);
+		query.append(Strings.isNullOrEmpty(keyword.getIndex()) ? "" : "index=" + keyword.getIndex() + SPACE);
+		query.append("| stats count" + AMPERSAND + "output_mode=json");
+		query.append(AMPERSAND + "earliest_time=" + fromTime + AMPERSAND + "latest_time=" + toTime);
+		return query.toString();
 	}
 }

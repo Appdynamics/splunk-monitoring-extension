@@ -7,13 +7,23 @@ username: "admin"
 password: "admin"
 usessl: true
 
-searchKeywords: [
-                  "controller",
-                  "thread"
-                ]
-
 # number of concurrent tasks
 numberOfThreads: 5
 
 #prefix used to show up metrics in AppDynamics
 metricPrefix:  "Custom Metrics|Splunk|"
+
+searchKeywords: 
+     - keyword: "Splunk"
+       host: ""
+       source: ""
+       sourcetype: ""
+       index: ""
+       displayName: "Splunk"
+       
+     - keyword: "Controller"
+       host: ""
+       source: ""
+       sourcetype: ""
+       index: ""
+       displayName: "Controller"

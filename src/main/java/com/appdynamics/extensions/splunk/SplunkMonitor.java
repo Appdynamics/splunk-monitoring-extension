@@ -35,6 +35,7 @@ import com.appdynamics.extensions.PathResolver;
 import com.appdynamics.extensions.http.SimpleHttpClient;
 import com.appdynamics.extensions.splunk.common.Authenticator;
 import com.appdynamics.extensions.splunk.config.Configuration;
+import com.appdynamics.extensions.splunk.config.SearchKeyword;
 import com.appdynamics.extensions.yml.YmlReader;
 import com.google.common.base.Strings;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
@@ -92,7 +93,7 @@ public class SplunkMonitor extends AManagedMonitor {
 			String authToken) {
 		CompletionService<SplunkMetrics> parallelTasks = new ExecutorCompletionService<SplunkMetrics>(threadPool);
 		if (config != null && config.getSearchKeywords() != null) {
-			for (String keyword : config.getSearchKeywords()) {
+			for (SearchKeyword keyword : config.getSearchKeywords()) {
 				SplunkMonitorTask monitorTask = new SplunkMonitorTask(httpClient, authToken, keyword);
 				parallelTasks.submit(monitorTask);
 			}

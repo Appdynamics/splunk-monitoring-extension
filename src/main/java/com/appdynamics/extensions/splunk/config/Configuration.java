@@ -15,8 +15,7 @@
  */
 package com.appdynamics.extensions.splunk.config;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 public class Configuration {
 
@@ -25,9 +24,9 @@ public class Configuration {
 	private String username;
 	private String password;
 	private boolean usessl;
-	private Set<String> searchKeywords = new HashSet<String>();
 	private int numberOfThreads;
 	private String metricPrefix;
+	private List<SearchKeyword> searchKeywords;
 
 	public String getHost() {
 		return host;
@@ -77,11 +76,11 @@ public class Configuration {
 		this.metricPrefix = metricPrefix;
 	}
 
-	public Set<String> getSearchKeywords() {
+	public List<SearchKeyword> getSearchKeywords() {
 		return searchKeywords;
 	}
 
-	public void setSearchKeywords(Set<String> searchKeywords) {
+	public void setSearchKeywords(List<SearchKeyword> searchKeywords) {
 		this.searchKeywords = searchKeywords;
 	}
 
