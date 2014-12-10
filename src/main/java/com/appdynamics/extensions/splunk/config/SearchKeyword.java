@@ -3,11 +3,11 @@ package com.appdynamics.extensions.splunk.config;
 public class SearchKeyword {
 
 	private String keyword;
+	private String displayName;
 	private String host;
 	private String source;
 	private String sourcetype;
 	private String index;
-	private String displayName;
 
 	public String getKeyword() {
 		return keyword;

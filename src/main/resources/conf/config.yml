@@ -15,15 +15,15 @@ metricPrefix:  "Custom Metrics|Splunk|"
 
 searchKeywords: 
      - keyword: "Splunk"
+       displayName: "Splunk"
        host: ""
        source: ""
        sourcetype: ""
        index: ""
-       displayName: "Splunk"
        
      - keyword: "Controller"
+       displayName: "Controller"
        host: ""
        source: ""
        sourcetype: ""
        index: ""
-       displayName: "Controller"

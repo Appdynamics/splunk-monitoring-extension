@@ -61,11 +61,12 @@ public class SplunkMonitorTask implements Callable<SplunkMetrics> {
 
 			WebTarget target = httpClient.target().path(QUERY_ENDPOINT_URI);
 			target.header("Authorization", authToken);
-			String data = buildQuery(keyword, fromTime, toTime);
-			response = target.post(data);
+			String query = buildQuery(keyword, fromTime, toTime);
+			response = target.post(query);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Queried Splunk for " + keyword + " to retrieve eventcount for the time period " + new Date(fromTime * 1000) + " to "
 						+ new Date(toTime * 1000));
+				logger.debug("Query is " + query);
 			}
 			JsonNode node = new ObjectMapper().readValue(response.string(), JsonNode.class);
 			String value = node.findValue("count").asText();

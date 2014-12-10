@@ -109,11 +109,11 @@ public class SplunkMonitor extends AManagedMonitor {
 				metric = parallelTasks.take().get(TIMEOUT, TimeUnit.SECONDS);
 				allMetrics.add(metric);
 			} catch (InterruptedException e) {
-				logger.error("Task interrupted." + e);
+				logger.error("Task interrupted. ", e);
 			} catch (ExecutionException e) {
-				logger.error("Task execution failed." + e);
+				logger.error("Task execution failed. ", e);
 			} catch (TimeoutException e) {
-				logger.error("Task timed out." + e);
+				logger.error("Task timed out. ", e);
 			}
 		}
 		return allMetrics;
