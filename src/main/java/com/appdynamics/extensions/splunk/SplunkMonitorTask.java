@@ -71,8 +71,7 @@ public class SplunkMonitorTask implements Callable<SplunkMetrics> {
 			JsonNode node = new ObjectMapper().readValue(response.string(), JsonNode.class);
 			String value = node.findValue("count").asText();
 			String metricName = Strings.isNullOrEmpty(keyword.getDisplayName()) ? keyword.getKeyword() : keyword.getDisplayName();
-			String metricPath = metricName + "_count";
-			metrics.put(metricPath, value);
+			metrics.put(metricName, value);
 			splunkMetrics.setMetrics(metrics);
 		} catch (Exception e) {
 			logger.error("Error in querying count for " + keyword, e);

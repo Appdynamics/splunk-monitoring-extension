@@ -13,13 +13,14 @@ Using Splunk's REST API, this extension searches for a keyword every minute and 
 3. Configure the extension referring to the below section.
 4. Restart the machine agent.
 
-In the AppDynamics Metric Browser, look for `Application Infrastructure Performance | <METRIC_PREFIX>|keyword_count`
+In the AppDynamics Metric Browser, look for `Application Infrastructure Performance | <METRIC_PREFIX>|displayName OR keyword`
 
 ## Configuration ##
 Note : Please make sure to not use tab (\t) while editing yaml files. You may want to validate the yaml file using a [yaml validator](http://yamllint.com/)
 
 1. Configure the Splunk extension by editing the config.yml file in `<MACHINE_AGENT_HOME>/monitors/SplunkMonitor/`. Specify the host, port, username, password of Splunk server.
 
+In searchKeywords, list the keywords you want to monitor. For each keyword displayName, host, source, sourcetype and index are optional.
    For eg.
    ```
         # Splunk Server particulars
@@ -64,7 +65,7 @@ Note : Please make sure to not use tab (\t) while editing yaml files. You may wa
 
 ## Metrics
 
-* count (event count for a keyword)
+* keyword OR displayName (event count for a keyword)
 
 Note : By default, a Machine agent or a AppServer agent can send a fixed number of metrics to the controller. To change this limit, please follow the instructions mentioned [here](http://docs.appdynamics.com/display/PRO14S/Metrics+Limits).
 For eg.  
