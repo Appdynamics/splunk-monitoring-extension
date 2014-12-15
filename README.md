@@ -18,9 +18,8 @@ In the AppDynamics Metric Browser, look for `Application Infrastructure Performa
 ## Configuration ##
 Note : Please make sure to not use tab (\t) while editing yaml files. You may want to validate the yaml file using a [yaml validator](http://yamllint.com/)
 
-1. Configure the Splunk extension by editing the config.yml file in `<MACHINE_AGENT_HOME>/monitors/SplunkMonitor/`. Specify the host, port, username, password of Splunk server.
+1. Configure the Splunk extension by editing the config.yml file in `<MACHINE_AGENT_HOME>/monitors/SplunkMonitor/`. Specify the host, port, username, password of Splunk server. In searchKeywords, list the keywords you want to monitor. For each keyword displayName, host, source, sourcetype and index are optional.
 
-In searchKeywords, list the keywords you want to monitor. For each keyword displayName, host, source, sourcetype and index are optional.
    For eg.
    ```
         # Splunk Server particulars
